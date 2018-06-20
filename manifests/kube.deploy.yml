@@ -1,0 +1,44 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: "tmbapp8-service"
+spec:
+  # if your cluster supports it, uncomment the following to automatically create
+  # an external load-balanced IP for the frontend service.
+  #type: LoadBalancer
+  type: NodePort
+  ports:
+  # the port that this service should serve on
+  - name: http
+    port: 9080
+  - name: https
+    port: 9443
+
+  selector:
+    app: "tmbapp8-selector"
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: "tmbapp8-deployment"
+spec:
+  # this replicas value is default
+  # modify it according to your case
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: "tmbapp8-selector"
+    spec:
+      containers:
+      - name: tmbapp8
+        image: tmbapp8:latest
+        readinessProbe:
+          httpGet:
+            path: /tmbapp8/health
+            port: 9080
+          initialDelaySeconds: 20
+        # resources:
+        #   requests:
+        #     cpu: 100m
+        #     memory: 100Mi
